@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updatePerson = exports.postPerson = exports.deletePerson = exports.getPerson = exports.getPersons = void 0;
+exports.updatePerson = exports.postPerson = exports.deletePerson = exports.getPersonByName = exports.getPerson = exports.getPersons = void 0;
 const person_1 = __importDefault(require("../models/person"));
 //Control para obtener usuarios
 const getPersons = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -35,6 +35,26 @@ const getPerson = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.getPerson = getPerson;
+//Crontol para obtener el usuario por nombre_Usuario
+const getPersonByName = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { nombre_Usuario } = req.params;
+    console.log(nombre_Usuario);
+    const person = yield person_1.default.findOne({
+        where: {
+            nombre_Usuario: nombre_Usuario,
+        },
+    });
+    console.log(person);
+    if (person) {
+        res.json(person);
+    }
+    else {
+        res.status(404).json({
+            msg: 'Persona no encontrada'
+        });
+    }
+});
+exports.getPersonByName = getPersonByName;
 //Control para eliminiar usuario con id
 const deletePerson = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;

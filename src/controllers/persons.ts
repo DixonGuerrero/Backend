@@ -30,6 +30,31 @@ export const getPerson = async (req:Request,res:Response) =>
     
 }
 
+//Crontol para obtener el usuario por nombre_Usuario
+export const getPersonByName = async (req:Request,res:Response) => 
+{
+    const { nombre_Usuario } = req.params;
+
+    console.log(nombre_Usuario);
+
+    const person = await Person.findOne({
+  where: {
+    nombre_Usuario: nombre_Usuario,
+  },
+});
+
+    console.log(person);
+
+    if (person) {
+       res.json(person) 
+    } else {
+        res.status(404).json({
+            msg: 'Persona no encontrada'
+        })
+    }
+
+    
+}
 //Control para eliminiar usuario con id
 
 export const deletePerson = async (req: Request, res: Response) => {
