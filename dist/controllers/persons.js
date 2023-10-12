@@ -38,13 +38,11 @@ exports.getPerson = getPerson;
 //Crontol para obtener el usuario por nombre_Usuario
 const getPersonByName = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { nombre_Usuario } = req.params;
-    console.log(nombre_Usuario);
     const person = yield person_1.default.findOne({
         where: {
             nombre_Usuario: nombre_Usuario,
         },
     });
-    console.log(person);
     if (person) {
         res.json(person);
     }
@@ -74,7 +72,7 @@ const deletePerson = (req, res) => __awaiter(void 0, void 0, void 0, function* (
 exports.deletePerson = deletePerson;
 //Control para Crear usuario
 const postPerson = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    //en el body.json no es necesario poner el id de la nueva persona
+    //En el body.json no es necesario poner el id de la nueva persona
     const { body } = req;
     try {
         yield person_1.default.create(body);

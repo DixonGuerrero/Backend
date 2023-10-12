@@ -35,15 +35,11 @@ export const getPersonByName = async (req:Request,res:Response) =>
 {
     const { nombre_Usuario } = req.params;
 
-    console.log(nombre_Usuario);
-
     const person = await Person.findOne({
   where: {
     nombre_Usuario: nombre_Usuario,
   },
 });
-
-    console.log(person);
 
     if (person) {
        res.json(person) 
@@ -78,7 +74,7 @@ export const deletePerson = async (req: Request, res: Response) => {
 
 export const postPerson = async (req: Request, res: Response) => {
     
-    //en el body.json no es necesario poner el id de la nueva persona
+    //En el body.json no es necesario poner el id de la nueva persona
     const { body } = req;
     try {
     await Person.create(body);
