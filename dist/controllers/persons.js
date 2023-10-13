@@ -103,41 +103,31 @@ const updatePerson = (req, res) => __awaiter(void 0, void 0, void 0, function* (
     const { id } = req.params;
     const { body } = req;
     var correoValidation = false;
-    var nameUserValidation = false;
+    var nombreValidation = false;
     var passwordValidation = false;
-    //Validamos dependiendo lo que venga en el body
-    while (!correoValidation) {
-        if (body.correo_Electronico != null) {
-            //Validamos que el correo
-            if (!correoValidation) {
-                correoValidation = yield validateCorreo(body['correo_Electronico'], res);
-            }
-        }
-        else {
-            correoValidation = true;
+    if (body.correo_Electronico) {
+        correoValidation = yield validateCorreo(body['correo_Electronico'], res);
+    }
+    else {
+        correoValidation = true;
+    }
+    if (body.nombre_Usuario) {
+        if (correoValidation) {
+            nombreValidation = yield validateNombreUsuario(body['nombre_Usuario'], res);
         }
     }
-    while (!nameUserValidation) {
-        if (body.nombre_Usuario != undefined) {
-            if (!nameUserValidation) {
-                nameUserValidation = yield validateNombreUsuario(body['nombre_Usuario'], res);
-            }
-        }
-        else {
-            nameUserValidation = true;
+    else {
+        nombreValidation = true;
+    }
+    if (body.contrasenia) {
+        if (nombreValidation) {
+            passwordValidation = yield validateContrasenia(body['contrasenia'], res);
         }
     }
-    while (!passwordValidation) {
-        if (body.contrasenia != undefined) {
-            if (!passwordValidation) {
-                passwordValidation = yield validateContrasenia(body['contrasenia'], res);
-            }
-        }
-        else {
-            passwordValidation = true;
-        }
+    else {
+        passwordValidation = true;
     }
-    if (passwordValidation && correoValidation && nameUserValidation) {
+    if (nombreValidation && correoValidation && passwordValidation) {
         try {
             const person = yield person_1.default.findByPk(id);
             if (person) {

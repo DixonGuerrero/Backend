@@ -113,53 +113,36 @@ export const updatePerson = async (req: Request, res: Response) => {
     const { id } = req.params;
     const { body } = req;
     var correoValidation = false;
-    var nameUserValidation = false;
+    var nombreValidation = false;
     var passwordValidation = false;
 
-    
-
-    //Validamos dependiendo lo que venga en el body
-    
-    while (!correoValidation) {
-        
-        if (body.correo_Electronico != null) {
-            
-            //Validamos que el correo
-            if (!correoValidation) {
-              correoValidation = await validateCorreo(body['correo_Electronico'], res)  
-            }
-            
-        } else {
-            correoValidation = true;
-        }
-    }
-
- 
-    while (!nameUserValidation) {
-        if (body.nombre_Usuario != undefined) {
-            
-            if (!nameUserValidation) {
-                nameUserValidation = await validateNombreUsuario(body['nombre_Usuario'], res)
-            }
-        } else {
-            nameUserValidation = true;
-        }
-    }
-
-    while (!passwordValidation) {
-        if (body.contrasenia != undefined) {
-            
-            if (!passwordValidation) {
-                passwordValidation = await validateContrasenia(body['contrasenia'], res)    
-            }
-        } else {
-            passwordValidation = true;
-        }
-
+    if (body.correo_Electronico) {
+        correoValidation = await validateCorreo(body['correo_Electronico'], res);
+    } else {
+        correoValidation = true;
     }
         
+    if (body.nombre_Usuario) {
+       if (correoValidation) {
+            nombreValidation = await validateNombreUsuario(body['nombre_Usuario'], res);
+        } 
+    } else {
+        nombreValidation = true;
+    }
+    
+
+    if (body.contrasenia) {
+        if (nombreValidation) {
+            passwordValidation = await validateContrasenia(body['contrasenia'], res);
+        }
+    
+    } else {
+        passwordValidation = true;
+    }
+    
+    
             
-    if (passwordValidation && correoValidation && nameUserValidation) {
+    if ( nombreValidation && correoValidation && passwordValidation) {
         try {
             const person = await Person.findByPk(id);
             if (person) {
@@ -169,6 +152,8 @@ export const updatePerson = async (req: Request, res: Response) => {
                     id,
                     body
                 })
+
+               
             } else {
                 res.status(404).json({
                     msg: 'La Persona no existe'
@@ -182,7 +167,9 @@ export const updatePerson = async (req: Request, res: Response) => {
             })
         
         }
+ 
     }
+
         
 }
     
