@@ -17,7 +17,6 @@ const person_1 = __importDefault(require("../models/person"));
 //Control para obtener usuarios
 const getPersons = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const listPersons = yield person_1.default.findAll();
-    console.log(listPersons);
     res.json(listPersons);
 });
 exports.getPersons = getPersons;
@@ -72,20 +71,30 @@ const deletePerson = (req, res) => __awaiter(void 0, void 0, void 0, function* (
 exports.deletePerson = deletePerson;
 //Control para Crear usuario
 const postPerson = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    //En el body.json no es necesario poner el id de la nueva persona
     const { body } = req;
-    try {
-        yield person_1.default.create(body);
-        res.json({
-            msg: 'Persona Creada con exito',
-            body
-        });
+    var nombreValidation = false;
+    var passwordValidation = false;
+    const correoValidation = yield validateCorreo(body['correo_Electronico'], res);
+    if (correoValidation) {
+        nombreValidation = yield validateNombreUsuario(body['nombre_Usuario'], res);
     }
-    catch (error) {
-        console.log(error);
-        res.json({
-            msg: 'Fallo la creacion de la persona'
-        });
+    if (nombreValidation) {
+        passwordValidation = yield validateContrasenia(body['contrasenia'], res);
+    }
+    if (correoValidation && nombreValidation && passwordValidation) {
+        try {
+            yield person_1.default.create(body);
+            res.json({
+                msg: 'Persona Creada con éxito',
+                body
+            });
+        }
+        catch (error) {
+            console.log(error);
+            res.json({
+                msg: 'Fallo la creación de la persona'
+            });
+        }
     }
 });
 exports.postPerson = postPerson;
@@ -93,27 +102,107 @@ exports.postPerson = postPerson;
 const updatePerson = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
     const { body } = req;
-    try {
-        const person = yield person_1.default.findByPk(id);
-        if (person) {
-            yield person.update(body);
-            res.json({
-                msg: 'La persona fue actualizada con exito',
-                id,
-                body
-            });
+    var correoValidation = false;
+    var nameUserValidation = false;
+    var passwordValidation = false;
+    //Validamos dependiendo lo que venga en el body
+    while (!correoValidation) {
+        if (body.correo_Electronico != null) {
+            //Validamos que el correo
+            if (!correoValidation) {
+                correoValidation = yield validateCorreo(body['correo_Electronico'], res);
+            }
         }
         else {
-            res.status(404).json({
-                msg: 'La Persona no existe'
-            });
+            correoValidation = true;
         }
     }
-    catch (error) {
-        console.log(error);
-        res.status(404).json({
-            msg: 'Fallo la actualizacion de la persona'
-        });
+    while (!nameUserValidation) {
+        if (body.nombre_Usuario != undefined) {
+            if (!nameUserValidation) {
+                nameUserValidation = yield validateNombreUsuario(body['nombre_Usuario'], res);
+            }
+        }
+        else {
+            nameUserValidation = true;
+        }
+    }
+    while (!passwordValidation) {
+        if (body.contrasenia != undefined) {
+            if (!passwordValidation) {
+                passwordValidation = yield validateContrasenia(body['contrasenia'], res);
+            }
+        }
+        else {
+            passwordValidation = true;
+        }
+    }
+    if (passwordValidation && correoValidation && nameUserValidation) {
+        try {
+            const person = yield person_1.default.findByPk(id);
+            if (person) {
+                yield person.update(body);
+                res.json({
+                    msg: 'La persona fue actualizada con exito',
+                    id,
+                    body
+                });
+            }
+            else {
+                res.status(404).json({
+                    msg: 'La Persona no existe'
+                });
+            }
+        }
+        catch (error) {
+            console.log(error);
+            res.status(404).json({
+                msg: 'Fallo la actualizacion de la persona'
+            });
+        }
     }
 });
 exports.updatePerson = updatePerson;
+//Funciones para facilitar validaciones
+function validateCorreo(correo, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (!correo || !correo.includes('@') || !/@[a-zA-Z]+/.test(correo)) {
+            res.json({ msg: `${correo} <- Esto no es una dirección de correo válida` });
+            return false;
+        }
+        const personSearchEmail = yield person_1.default.findOne({ where: { correo_Electronico: correo } });
+        if (personSearchEmail) {
+            res.json({ msg: `${correo} <- Esta dirección de correo ya existe` });
+            return false;
+        }
+        return true;
+    });
+}
+function validateNombreUsuario(nombreUsuario, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (!nombreUsuario || nombreUsuario.length <= 5) {
+            res.json({ msg: `${nombreUsuario} <- El nombre de usuario requiere al menos 5 caracteres` });
+            return false;
+        }
+        const personSearchNameUser = yield person_1.default.findOne({ where: { nombre_Usuario: nombreUsuario } });
+        if (personSearchNameUser) {
+            res.json({ msg: `${nombreUsuario} <- Este nombre de usuario ya existe` });
+            return false;
+        }
+        return true;
+    });
+}
+function validateContrasenia(contrasenia, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (!contrasenia || contrasenia.length < 8 || !/[\W_]/.test(contrasenia) || contrasenia.length >= 15) {
+            res.json({ msg: `${contrasenia} <- Esta contraseña no cumple con el estándar` });
+            return false;
+        }
+        const personSearchPassword = yield person_1.default.findOne({ where: { contrasenia } });
+        if (personSearchPassword) {
+            res.json({ msg: `${contrasenia} <- Esta contraseña no es válida` });
+            return false;
+        }
+        return true;
+    });
+}
