@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const persons_1 = __importDefault(require("../routes/persons"));
 const view_1 = __importDefault(require("../routes/view"));
+const comment_1 = __importDefault(require("../routes/comment"));
 const connetion_1 = __importDefault(require("../db/connetion"));
 const cors_1 = __importDefault(require("cors"));
 class Server {
@@ -40,6 +41,7 @@ class Server {
         //Definimos ruta base de la api
         this.app.use('/api/personas', persons_1.default);
         this.app.use('/api/vista', view_1.default);
+        this.app.use('/api/comentarios', comment_1.default);
     }
     middlewares() {
         //parseamos el body
