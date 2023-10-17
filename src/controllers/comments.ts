@@ -56,12 +56,12 @@ export const deletecomentario = async (req: Request, res: Response) => {
     const comment = await comentario.findByPk(id);
     if (!comment) {
         res.status(404).json({
-            msg: 'Persona no encontrada'
+            msg: 'comentario no encontrada'
         })
     } else {
         await comment.destroy();
         res.json({
-            msg: 'Persona eliminada con exito'
+            msg: 'Comentario eliminado con exito'
         })
     }
    

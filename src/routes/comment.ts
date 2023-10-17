@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { deletecomentario, getcomentarios, getcomentario, postcomentario, getcomentariopl} from '../controllers/comments';
+import { deletecomentario, getcomentarios, postcomentario, getcomentariopl, getcomentario} from '../controllers/comments';
 
 const router = Router();
 
