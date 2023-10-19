@@ -162,7 +162,9 @@ export const updatePerson = async (req: Request, res: Response) => {
 
 async function validateCorreo(correo: string, res: Response) {
   if (!correo || !correo.includes("@") || !/@[a-zA-Z]+/.test(correo)) {
-    res.json({ msg: `${correo} <- Esto no es una dirección de correo válida` });
+    res
+      .status(400)
+      .json({ msg: `${correo} <- Esto no es una dirección de correo válida` });
     return false;
   }
 
@@ -170,7 +172,9 @@ async function validateCorreo(correo: string, res: Response) {
     where: { correo_Electronico: correo },
   });
   if (personSearchEmail) {
-    res.json({ msg: `${correo} <- Esta dirección de correo ya existe` });
+    res
+      .status(400)
+      .json({ msg: `${correo} <- Esta dirección de correo ya existe` });
     return false;
   }
 
@@ -179,7 +183,7 @@ async function validateCorreo(correo: string, res: Response) {
 
 async function validateNombreUsuario(nombreUsuario: string, res: Response) {
   if (!nombreUsuario || nombreUsuario.length <= 5) {
-    res.json({
+    res.status(400).json({
       msg: `${nombreUsuario} <- El nombre de usuario requiere al menos 5 caracteres`,
     });
     return false;
@@ -189,7 +193,9 @@ async function validateNombreUsuario(nombreUsuario: string, res: Response) {
     where: { nombre_Usuario: nombreUsuario },
   });
   if (personSearchNameUser) {
-    res.json({ msg: `${nombreUsuario} <- Este nombre de usuario ya existe` });
+    res
+      .status(400)
+      .json({ msg: `${nombreUsuario} <- Este nombre de usuario ya existe` });
     return false;
   }
 
@@ -203,7 +209,7 @@ async function validateContrasenia(contrasenia: string, res: Response) {
     !/[\W_]/.test(contrasenia) ||
     contrasenia.length >= 15
   ) {
-    res.json({
+    res.status(400).json({
       msg: `${contrasenia} <- Esta contraseña no cumple con el estándar`,
     });
     return false;
@@ -211,7 +217,9 @@ async function validateContrasenia(contrasenia: string, res: Response) {
 
   const personSearchPassword = await Person.findOne({ where: { contrasenia } });
   if (personSearchPassword) {
-    res.json({ msg: `${contrasenia} <- Esta contraseña no es válida` });
+    res
+      .status(400)
+      .json({ msg: `${contrasenia} <- Esta contraseña no es válida` });
     return false;
   }
 
@@ -226,32 +234,37 @@ export const loginPerson = async(req:Request, res:Response)=>{
     //se valida que el usuario exista
     const user= await Person.findOne({
         where:{
-            nombre_Usuario:nombre_Usuario
+        nombre_Usuario: nombre_Usuario,
+        contrasenia: contrasenia
         }
     })
     if(!user){
         return res.status(400).json({
 
-            msg:'No existe una persona con el nombre '+nombre_Usuario
+            msg:'El nombre de usuario o contraseña son erroneos '
         })
     }//if
 
     //validamos la contraseña
-        const password= await Person.findOne({where:{
-            contrasenia:contrasenia
-        }})
-        if(!password){
-          return  res.status(400).json({
-            msg:'Contraseña incorecta'
-          })
-        }//if
+        
 
     //creacion del token para permitir entrada
     const token=jwt.sign({
-        nombre_Usuario:nombre_Usuario
+      user
 
 
     },process.env.SECRET_KEY|| 'pepito123');
+  const userValidation = jwt.decode(token);
 
-    res.json({token});
+  if (
+    userValidation !== null &&
+    typeof userValidation === "object" &&
+    "user" in userValidation
+  ) {
+    const user = userValidation.user;
+    res.json(user);
+  } else {
+    // Trata el caso en el que userValidation es null o no contiene la propiedad 'user'
+    res.status(404).json({ error: "No se encontró un usuario válido" });
+  }
 }//loginPerson

@@ -13,7 +13,7 @@ const Person = connetion_1.default.define('Persona', {
     },
     Id_Tipo_Usuario: {
         type: sequelize_1.DataTypes.INTEGER,
-        allowNull: false,
+        defaultValue: 2,
     },
     imagen_Perfil: {
         type: sequelize_1.DataTypes.STRING,

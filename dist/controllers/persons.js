@@ -12,8 +12,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updatePerson = exports.postPerson = exports.deletePerson = exports.getPersonByName = exports.getPerson = exports.getPersons = void 0;
+exports.loginPerson = exports.updatePerson = exports.postPerson = exports.deletePerson = exports.getPersonByName = exports.getPerson = exports.getPersons = void 0;
 const person_1 = __importDefault(require("../models/person"));
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 //Control para obtener usuarios
 const getPersons = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const listPersons = yield person_1.default.findAll();
@@ -29,7 +30,7 @@ const getPerson = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
     else {
         res.status(404).json({
-            msg: 'Persona no encontrada'
+            msg: "Persona no encontrada",
         });
     }
 });
@@ -47,7 +48,7 @@ const getPersonByName = (req, res) => __awaiter(void 0, void 0, void 0, function
     }
     else {
         res.status(404).json({
-            msg: 'Persona no encontrada'
+            msg: "Persona no encontrada",
         });
     }
 });
@@ -58,13 +59,13 @@ const deletePerson = (req, res) => __awaiter(void 0, void 0, void 0, function* (
     const person = yield person_1.default.findByPk(id);
     if (!person) {
         res.status(404).json({
-            msg: 'Persona no encontrada'
+            msg: "Persona no encontrada",
         });
     }
     else {
         yield person.destroy();
         res.json({
-            msg: 'Persona eliminada con exito'
+            msg: "Persona eliminada con exito",
         });
     }
 });
@@ -74,25 +75,25 @@ const postPerson = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     const { body } = req;
     var nombreValidation = false;
     var passwordValidation = false;
-    const correoValidation = yield validateCorreo(body['correo_Electronico'], res);
+    const correoValidation = yield validateCorreo(body["correo_Electronico"], res);
     if (correoValidation) {
-        nombreValidation = yield validateNombreUsuario(body['nombre_Usuario'], res);
+        nombreValidation = yield validateNombreUsuario(body["nombre_Usuario"], res);
     }
     if (nombreValidation) {
-        passwordValidation = yield validateContrasenia(body['contrasenia'], res);
+        passwordValidation = yield validateContrasenia(body["contrasenia"], res);
     }
     if (correoValidation && nombreValidation && passwordValidation) {
         try {
             yield person_1.default.create(body);
             res.json({
-                msg: 'Persona Creada con éxito',
-                body
+                msg: "Persona Creada con éxito",
+                body,
             });
         }
         catch (error) {
             console.log(error);
             res.json({
-                msg: 'Fallo la creación de la persona'
+                msg: "Fallo la creación de la persona",
             });
         }
     }
@@ -106,14 +107,14 @@ const updatePerson = (req, res) => __awaiter(void 0, void 0, void 0, function* (
     var nombreValidation = false;
     var passwordValidation = false;
     if (body.correo_Electronico) {
-        correoValidation = yield validateCorreo(body['correo_Electronico'], res);
+        correoValidation = yield validateCorreo(body["correo_Electronico"], res);
     }
     else {
         correoValidation = true;
     }
     if (body.nombre_Usuario) {
         if (correoValidation) {
-            nombreValidation = yield validateNombreUsuario(body['nombre_Usuario'], res);
+            nombreValidation = yield validateNombreUsuario(body["nombre_Usuario"], res);
         }
     }
     else {
@@ -121,7 +122,7 @@ const updatePerson = (req, res) => __awaiter(void 0, void 0, void 0, function* (
     }
     if (body.contrasenia) {
         if (nombreValidation) {
-            passwordValidation = yield validateContrasenia(body['contrasenia'], res);
+            passwordValidation = yield validateContrasenia(body["contrasenia"], res);
         }
     }
     else {
@@ -133,21 +134,21 @@ const updatePerson = (req, res) => __awaiter(void 0, void 0, void 0, function* (
             if (person) {
                 yield person.update(body);
                 res.json({
-                    msg: 'La persona fue actualizada con exito',
+                    msg: "La persona fue actualizada con exito",
                     id,
-                    body
+                    body,
                 });
             }
             else {
                 res.status(404).json({
-                    msg: 'La Persona no existe'
+                    msg: "La Persona no existe",
                 });
             }
         }
         catch (error) {
             console.log(error);
             res.status(404).json({
-                msg: 'Fallo la actualizacion de la persona'
+                msg: "Fallo la actualizacion de la persona",
             });
         }
     }
@@ -156,13 +157,19 @@ exports.updatePerson = updatePerson;
 //Funciones para facilitar validaciones
 function validateCorreo(correo, res) {
     return __awaiter(this, void 0, void 0, function* () {
-        if (!correo || !correo.includes('@') || !/@[a-zA-Z]+/.test(correo)) {
-            res.json({ msg: `${correo} <- Esto no es una dirección de correo válida` });
+        if (!correo || !correo.includes("@") || !/@[a-zA-Z]+/.test(correo)) {
+            res
+                .status(400)
+                .json({ msg: `${correo} <- Esto no es una dirección de correo válida` });
             return false;
         }
-        const personSearchEmail = yield person_1.default.findOne({ where: { correo_Electronico: correo } });
+        const personSearchEmail = yield person_1.default.findOne({
+            where: { correo_Electronico: correo },
+        });
         if (personSearchEmail) {
-            res.json({ msg: `${correo} <- Esta dirección de correo ya existe` });
+            res
+                .status(400)
+                .json({ msg: `${correo} <- Esta dirección de correo ya existe` });
             return false;
         }
         return true;
@@ -171,12 +178,18 @@ function validateCorreo(correo, res) {
 function validateNombreUsuario(nombreUsuario, res) {
     return __awaiter(this, void 0, void 0, function* () {
         if (!nombreUsuario || nombreUsuario.length <= 5) {
-            res.json({ msg: `${nombreUsuario} <- El nombre de usuario requiere al menos 5 caracteres` });
+            res.status(400).json({
+                msg: `${nombreUsuario} <- El nombre de usuario requiere al menos 5 caracteres`,
+            });
             return false;
         }
-        const personSearchNameUser = yield person_1.default.findOne({ where: { nombre_Usuario: nombreUsuario } });
+        const personSearchNameUser = yield person_1.default.findOne({
+            where: { nombre_Usuario: nombreUsuario },
+        });
         if (personSearchNameUser) {
-            res.json({ msg: `${nombreUsuario} <- Este nombre de usuario ya existe` });
+            res
+                .status(400)
+                .json({ msg: `${nombreUsuario} <- Este nombre de usuario ya existe` });
             return false;
         }
         return true;
@@ -184,15 +197,54 @@ function validateNombreUsuario(nombreUsuario, res) {
 }
 function validateContrasenia(contrasenia, res) {
     return __awaiter(this, void 0, void 0, function* () {
-        if (!contrasenia || contrasenia.length < 8 || !/[\W_]/.test(contrasenia) || contrasenia.length >= 15) {
-            res.json({ msg: `${contrasenia} <- Esta contraseña no cumple con el estándar` });
+        if (!contrasenia ||
+            contrasenia.length < 8 ||
+            !/[\W_]/.test(contrasenia) ||
+            contrasenia.length >= 15) {
+            res.status(400).json({
+                msg: `${contrasenia} <- Esta contraseña no cumple con el estándar`,
+            });
             return false;
         }
         const personSearchPassword = yield person_1.default.findOne({ where: { contrasenia } });
         if (personSearchPassword) {
-            res.json({ msg: `${contrasenia} <- Esta contraseña no es válida` });
+            res
+                .status(400)
+                .json({ msg: `${contrasenia} <- Esta contraseña no es válida` });
             return false;
         }
         return true;
     });
 }
+const loginPerson = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { nombre_Usuario, contrasenia } = req.body; //aqui se manda solo el username y password ingresados en base de datos
+    //se valida que el usuario exista
+    const user = yield person_1.default.findOne({
+        where: {
+            nombre_Usuario: nombre_Usuario,
+            contrasenia: contrasenia
+        }
+    });
+    if (!user) {
+        return res.status(400).json({
+            msg: 'El nombre de usuario o contraseña son erroneos '
+        });
+    } //if
+    //validamos la contraseña
+    //creacion del token para permitir entrada
+    const token = jsonwebtoken_1.default.sign({
+        user
+    }, process.env.SECRET_KEY || 'pepito123');
+    const userValidation = jsonwebtoken_1.default.decode(token);
+    if (userValidation !== null &&
+        typeof userValidation === "object" &&
+        "user" in userValidation) {
+        const user = userValidation.user;
+        res.json(user);
+    }
+    else {
+        // Trata el caso en el que userValidation es null o no contiene la propiedad 'user'
+        res.status(404).json({ error: "No se encontró un usuario válido" });
+    }
+}); //loginPerson
+exports.loginPerson = loginPerson;
