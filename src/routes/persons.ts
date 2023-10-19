@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { deletePerson, getPerson, getPersonByName, getPersons, postPerson, updatePerson} from '../controllers/persons';
+import { deletePerson, getPerson, getPersonByName, getPersons, loginPerson, postPerson, updatePerson} from '../controllers/persons';
 
 const router = Router();
  
@@ -10,5 +10,6 @@ router.get('/name/:nombre_Usuario/' ,getPersonByName);
 router.delete('/:id/', deletePerson);
 router.post('/', postPerson);
 router.put('/:id/', updatePerson);
+router.post('/login',loginPerson)
 
 export default router; 
