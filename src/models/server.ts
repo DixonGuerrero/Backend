@@ -1,5 +1,6 @@
 import express, {Application, Request , Response} from 'express';
 import routesPersons from '../routes/persons'
+import routesView from '../routes/view'
 import db from '../db/connetion'
 import cors from 'cors'
 class Server {
@@ -32,6 +33,7 @@ class Server {
         this.app.use('/api/personas', routesPersons)
         
     
+        this.app.use('/api/vista', routesView)
     }
 
     middlewares() {

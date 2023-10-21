@@ -16,7 +16,6 @@ const express_1 = __importDefault(require("express"));
 const persons_1 = __importDefault(require("../routes/persons"));
 const view_1 = __importDefault(require("../routes/view"));
 const connetion_1 = __importDefault(require("../db/connetion"));
-const cors_1 = __importDefault(require("cors"));
 class Server {
     constructor() {
         this.app = (0, express_1.default)();
@@ -44,8 +43,6 @@ class Server {
     middlewares() {
         //parseamos el body
         this.app.use(express_1.default.json());
-        //Cors
-        this.app.use((0, cors_1.default)());
     }
     //Metodo para conectar base de datos
     dbConnect() {
