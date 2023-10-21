@@ -16,10 +16,16 @@ export const getPersons = async (req:Request,res:Response) =>
 
 export const getPerson = async (req:Request,res:Response) => 
 {
+
     const { id } = req.params;
     const person = await Person.findByPk(id);
 
+    
+    
+    
+
     if (person) {
+        
        res.json(person) 
     } else {
         res.status(404).json({

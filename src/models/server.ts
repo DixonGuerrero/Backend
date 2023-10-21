@@ -30,6 +30,7 @@ class Server {
 
         //Definimos ruta base de la api
         this.app.use('/api/personas', routesPersons)
+        
     
     }
 
