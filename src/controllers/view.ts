@@ -6,10 +6,17 @@ import view from '../models/view'
 
 export const getFavs = async (req:Request,res:Response) => 
 {   
-    const listFavs = await view.findAll();
+    
+    
+    const listFavs = await view.findAll({where:{
+        favoritos:1,
+    },}) ;
     console.log(listFavs);
 
     res.json(listFavs)
+    
+
+
 }
 
 //Control para obtener historial
@@ -49,6 +56,7 @@ export const postfav = async (req: Request, res: Response) => {
     
     //en el body.json no es necesario poner el id de la nueva persona
     const { body } = req;
+
     try {
     await view.create(body);
     res.json({
