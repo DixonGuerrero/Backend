@@ -57,13 +57,13 @@ const deletecomentario = (req, res) => __awaiter(void 0, void 0, void 0, functio
     const comment = yield comment_1.default.findByPk(id);
     if (!comment) {
         res.status(404).json({
-            msg: 'Persona no encontrada'
+            msg: 'comentario no encontrada'
         });
     }
     else {
         yield comment.destroy();
         res.json({
-            msg: 'Persona eliminada con exito'
+            msg: 'Comentario eliminado con exito'
         });
     }
 });
