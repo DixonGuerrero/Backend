@@ -30,7 +30,7 @@ const getPerson = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
     else {
         res.status(404).json({
-            msg: "Persona no encontrada",
+            msg: 'Persona no encontrada'
         });
     }
 });
@@ -246,5 +246,5 @@ const loginPerson = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         // Trata el caso en el que userValidation es null o no contiene la propiedad 'user'
         res.status(404).json({ error: "No se encontró un usuario válido" });
     }
-}); //loginPerson
+});
 exports.loginPerson = loginPerson;
