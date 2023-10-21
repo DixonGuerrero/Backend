@@ -1,7 +1,7 @@
 import express, {Application, Request , Response} from 'express';
 import routesPersons from '../routes/persons'
 import db from '../db/connetion'
-
+import cors from 'cors'
 class Server {
     private app: Application
     private port: string;
@@ -30,13 +30,17 @@ class Server {
 
         //Definimos ruta base de la api
         this.app.use('/api/personas', routesPersons)
+        
     
     }
 
     middlewares() {
     
         //parseamos el body
-        this.app.use(express.json())
+        this.app.use(express.json());
+
+        //Cors
+        this.app.use(cors());
     }
 
     //Metodo para conectar base de datos
