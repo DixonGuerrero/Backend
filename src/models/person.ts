@@ -9,7 +9,7 @@ const Person = sequelize.define('Persona', {
   },
   Id_Tipo_Usuario: {
     type: DataTypes.INTEGER,
-    allowNull: false,
+    defaultValue:2,
   },
   imagen_Perfil: {
     type: DataTypes.STRING,
